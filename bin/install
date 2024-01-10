@@ -36,6 +36,9 @@ prepare() {
   local icu_uconv=$(uconv -V)
   local icu_version=${icu_uconv##*ICU }
   local icu_version_major=${icu_version%.*}
+  local openssl_version=$(openssl version | awk '{print $2}')
+  local openssl_major_version=$(echo $openssl_version | cut -d'.' -f1)
+  local openssl_minor_version=$(echo $openssl_version | cut -d'.' -f2)
 
   if [ "$(uname)" == "Linux" ] && [ "$icu_version_major" -eq 68 ] && [ "$major" -ge 11 ]; then
     cd src || exit
@@ -48,6 +51,11 @@ prepare() {
     git apply $HOME/.asdf/plugins/postgres/lib/uuid-ossp.patch
     cd ..
   fi
+
+  if [ "$openssl_major_version" -ge '3' ] && [ "$openssl_minor_version" -ge '2' ]; then
+    git apply $HOME/.asdf/plugins/postgres/lib/openssl-32.patch
+  fi
+
 }
 
 construct_configure_options() {
